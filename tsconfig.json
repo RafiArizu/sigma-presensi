@@ -1,0 +1,5 @@
+{
+  "compilerOptions":{"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","strict":true,"esModuleInterop":true,"skipLibCheck":true,"outDir":"dist","rootDir":"."},
+  "include":["app.ts","server.ts","config/**/*.ts","controllers/**/*.ts","models/**/*.ts","routes/**/*.ts","services/**/*.ts","middlewares/**/*.ts","adapters/**/*.ts"],
+  "exclude":["views","node_modules","dist"]
+}

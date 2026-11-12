@@ -1,0 +1,8 @@
+{
+  "name": "sigma-presensi",
+  "private": true,
+  "type": "module",
+  "scripts": {"dev":"concurrently \"npm:dev:server\" \"npm:dev:client\"","dev:server":"tsx watch server.ts","dev:client":"npm --prefix views run dev","build":"npm run build:server && npm run build:client","build:server":"tsc -p tsconfig.json","build:client":"npm --prefix views run build","start":"node dist/server.js","test":"vitest run"},
+  "dependencies": {"cors":"^2.8.5","dotenv":"^16.4.7","express":"^5.1.0","helmet":"^8.1.0","mysql2":"^3.14.3","zod":"^3.25.76"},
+  "devDependencies": {"@types/cors":"^2.8.17","@types/express":"^5.0.3","@types/node":"^24.0.0","concurrently":"^9.2.1","tsx":"^4.20.3","typescript":"^5.9.2","vitest":"^3.2.4"}
+}
