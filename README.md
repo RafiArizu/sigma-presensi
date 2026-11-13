@@ -61,8 +61,6 @@ UI wajib tetap dapat digunakan pada browser HP dan desktop. State loading, koson
 ## Setup Native
 
 ```powershell
-git clone <url-repository-sigma>
-Set-Location sigma-presensi
 npm install
 npm install --prefix views
 Copy-Item .env.example .env
