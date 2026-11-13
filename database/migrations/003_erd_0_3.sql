@@ -1,17 +1,11 @@
 USE `sigma_presensi`;
 
 -- PRD-SIGMA revision 0.3.
--- Preconditions checked before execution: legacy face_recognation is empty.
+-- Non-destructive migration: legacy face_recognation remains for controlled cutover.
 SET @OLD_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- The revised ERD stores private photo metadata, not face templates in MySQL.
 ALTER TABLE `verification`
-    DROP FOREIGN KEY `fk_challenge_template`,
-    DROP INDEX `fk_challenge_template`,
-    DROP COLUMN `face_recognation_id`,
-    DROP COLUMN `trusted_result`,
-    DROP COLUMN `verified_at`,
     MODIFY COLUMN `user_id` BIGINT UNSIGNED NOT NULL,
     MODIFY COLUMN `work_session_id` BIGINT UNSIGNED NOT NULL,
     ADD COLUMN `latitude` DECIMAL(10,7) NULL AFTER `status`,
@@ -20,8 +14,6 @@ ALTER TABLE `verification`
     ADD COLUMN `location_captured_at` DATETIME(6) NULL AFTER `accuracy_meters`,
     ADD COLUMN `distance_meters` DECIMAL(10,2) NULL AFTER `location_captured_at`,
     ADD COLUMN `location_validated_at` DATETIME(6) NULL AFTER `distance_meters`;
-
-DROP TABLE `face_recognation`;
 
 CREATE TABLE `attendance_photos` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -49,7 +41,5 @@ CREATE TABLE `attendance_photos` (
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_unicode_ci;
-
-
 
 SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;
