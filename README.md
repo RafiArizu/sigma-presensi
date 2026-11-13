@@ -152,7 +152,13 @@ Tidak ada pendaftaran publik bebas, SSO, role keempat, payroll, HRIS, mobile nat
 
 ## Akun Demo
 
-Akun demo belum dibuat pada scaffold. Jangan mengarang password atau kredensial demo sebelum seed resmi tersedia.
+Password semua akun: `password`.
+
+| Role | Email |
+| --- | --- |
+| Peserta Magang / PKL | `` |
+| Staff Presensi | `` |
+| Admin Platform | `adminsigma_2@example.com` |
 
 ## Test dan Build
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import '../../styles/AdminDashboard.css';
+import '../../../styles/AdminDashboard.css';
 
 type AdminUser = { name: string; email: string | null; role: string };
 type AuthResponse = { user: AdminUser };

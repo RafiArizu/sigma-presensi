@@ -1,8 +1,6 @@
 import type { RequestHandler } from 'express';
-import { UserModel } from '../../models/UserModel.js';
-import {l}
 
-type Logout = {
+type LogoutController = {
   logout: RequestHandler;
 };
 
@@ -14,9 +12,13 @@ const logout: RequestHandler = (request, response, next) => {
       return;
     }
 
-    response.clearCookie(process.env.SESSION_COOKIE_NAME ?? 'sigma_session');
-    response.status(204).send();
+    response.clearCookie(
+      process.env.SESSION_COOKIE_NAME ?? 'sigma_session',
+      { path: '/login' },
+    );
+ 
+        response.status(204).send();
   });
 };
 
-export const authController: AuthController = { currentUser, logout };
+export const logoutController: LogoutController = { logout };

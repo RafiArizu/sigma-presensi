@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import AdminDashboard from './pages/Admin/dashboard';
-import Login from './pages/Auth/login';
+import AdminDashboard from './pages/Admin/dashboard/dashboardPage';
+import Login from './pages/Auth/loginPage';
 import styles from './App.module.css';
 
 type Health = { status: string; time: string };
@@ -13,7 +13,7 @@ function getPage(pathname: string): Page {
     return 'login';
   }
 
-  if (path === '/admin/dashboard') {
+  if (path === '/Admin/dashboard/index') {
     return 'admin-dashboard';
   }
 

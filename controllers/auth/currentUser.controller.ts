@@ -24,3 +24,5 @@ const currentUser: RequestHandler = async (request, response, next) => {
     next(error);
   }
 };
+
+export const currentUserController: currentUser = { currentUser };
