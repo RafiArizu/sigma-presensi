@@ -1,15 +1,19 @@
 import 'dotenv/config';
-import mysql from 'mysql2/promise';
+import pg from 'pg';
 
-export const pool = mysql.createPool({
-  host: process.env.MYSQL_HOST ?? '127.0.0.1',
-  port: Number(process.env.MYSQL_PORT ?? 3306),
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
-  waitForConnections: true,
-  connectionLimit: 10,
-  timezone: 'Z',
-  supportBigNumbers: true,
-  bigNumberStrings: true,
+const { Pool } = pg;
+
+export const pool = new Pool({
+  host: process.env.PGHOST ?? '127.0.0.1',
+  port: Number(process.env.PGPORT ?? 5432),
+  user: process.env.PGUSER ?? 'postgres',
+  password: process.env.PGPASSWORD ?? '',
+  database: process.env.PGDATABASE ?? 'sigma_presensi',
+  max: 10,
+  options: '-c timezone=UTC',
 });
+
+pool.on('connect', (client) => {
+  void client.query('SET search_path TO sigma_presensi, public');
+});
+

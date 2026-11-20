@@ -1,0 +1,327 @@
+.sidebar {
+  --main-navy: #244e96;
+  --sub-navy: #2c58a2;
+  --sidebar-text: var(--sigma-text-sidebar);
+  --hover-background: color-mix(in srgb, var(--sigma-background) 60%, transparent);
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 20;
+  display: flex;
+  width: 286px;
+  min-height: 0;
+  flex-direction: column;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  clip-path: none;
+  background: var(--main-navy);
+  color: var(--sidebar-text);
+  font-family: Poppins, 'Plus Jakarta Sans', sans-serif;
+}
+
+.sidebar::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 58px;
+  background: var(--sub-navy);
+  content: '';
+  pointer-events: none;
+}
+
+.sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.brand {
+  position: relative;
+  display: flex;
+  min-height: 118px;
+  margin-left: 58px;
+  padding: 20px 14px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  background: var(--main-navy);
+}
+
+.brandContent {
+  display: flex;
+  min-width: 0;
+  width: auto;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-8px);
+}
+
+
+.brandName {
+  margin: 0;
+  color: var(--sigma-background);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+
+.brandLogo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+.closeButton {
+  display: none;
+}
+
+.nav {
+  display: flex;
+  min-height: 0;
+  margin-top: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.navLabel,
+.note {
+  display: none;
+}
+
+.navLink,
+.accountLink {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  margin-left: 66px;
+  align-items: center;
+  gap: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px 0 0 6px;
+  background: transparent;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-decoration: none;
+}
+
+.navLink::before,
+.accountLink::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -66px;
+  width: 3px;
+  background: transparent;
+  content: '';
+}
+
+.navLink:hover,
+.navLink:focus-visible,
+.accountLink:hover,
+.accountLink:focus-visible {
+  background: var(--hover-background);
+  color: var(--sigma-navy);
+  outline: none;
+}
+
+
+.navLinkActive {
+  background: var(--sigma-background);
+  color: var(--sigma-navy);
+}
+
+
+.navLinkActive::before {
+  background: var(--sidebar-text);
+}
+
+.navIcon {
+  position: absolute;
+  left: -66px;
+  display: grid;
+  width: 58px;
+  height: 48px;
+  place-items: center;
+  color: var(--sidebar-text);
+}
+
+.navIconSvg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.navIconImage {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.accountActions {
+  margin-top: auto;
+  padding: 16px 0 9px;
+  position: relative;
+}
+
+.accountActions::before {
+  display: block;
+  width: calc(100% - 66px);
+  height: 1px;
+  margin: 0 0 16px 66px;
+  background: var(--sigma-background);
+  content: '';
+}
+
+.accountLinkActive {
+  background: var(--sigma-background);
+  color: var(--sigma-navy);
+}
+
+.logoutButton {
+  width: calc(100% - 66px);
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    inset: 0 auto 0 0;
+    width: min(286px, calc(100vw - 24px));
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    clip-path: none;
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .brandLogo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+.closeButton {
+    display: block;
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    color: var(--sidebar-text);
+    cursor: pointer;
+    font-size: 1.35rem;
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    display: block;
+    border: 0;
+    background: rgba(31, 31, 31, 0.45);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .backdropVisible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+
+/* Viewport-locked sidebar shared by every role. */
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+
+/* Sidebar never scrolls; page content owns scrolling. */
+.sidebar {
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+/* Stretch fixed sidebar between viewport edges; footer remains document-driven. */
+.sidebar {
+  inset: 0 auto 0 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* Final viewport lock prevents sidebar clipping on dynamic browser viewports. */
+.sidebar {
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  max-height: 100dvh !important;
+}
+
+/* Use viewport edges instead of a calculated height; avoids clipping in browser viewport modes. */
+.sidebar {
+  top: 0 !important;
+  right: auto !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+/* Final static sidebar frame: independent from document content height. */
+.sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: 0 !important;
+  width: 286px !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  overflow: hidden !important;
+  flex: none !important;
+}
+
+.nav {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.accountActions {
+  flex: 0 0 auto;
+}
+
+.accountLinkActive::before { background: var(--sidebar-text); }
+
+.accountActions { display: flex; flex-direction: column; gap: 12px; }
+.accountActions .accountLink { min-height: 48px; padding: 0 14px; }

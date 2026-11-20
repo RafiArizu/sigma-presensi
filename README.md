@@ -1,6 +1,6 @@
 # SIGMA
 
-Sistem Identifikasi dan Pengelolaan Magang serta Absensi. SIGMA adalah aplikasi web presensi peserta PKL dan magang PT. Vaiotech Lintas Nusantara dengan verifikasi wajah, pemeriksaan lokasi, pengelolaan penempatan, pengajuan izin/sakit, koreksi, rekap, dan audit.
+Sistem Identifikasi dan Pengelolaan Magang serta Absensi. SIGMA adalah aplikasi web presensi peserta PKL dan magang PT. Vaiotech Lintas Nusantara dengan bukti foto, pemeriksaan lokasi, pengelolaan penempatan, pengajuan izin/sakit, koreksi, rekap, serta tata kelola data foto.
 
 Status proyek: **Draft / MVP**. Aplikasi dikembangkan satu orang untuk satu organisasi pada tahap awal.
 
@@ -9,9 +9,9 @@ Status proyek: **Draft / MVP**. Aplikasi dikembangkan satu orang untuk satu orga
 - Backend: Node.js 24, Express, TypeScript.
 - Frontend: React, TypeScript, Vite.
 - Styling: CSS Modules dan CSS global.
-- Database: MySQL 8+ dari Laragon, driver `mysql2` Promise API.
-- Authentication: sesi server berbasis cookie; session store MySQL disiapkan sebagai target implementasi.
-- Face recognition: verifikasi 1:1 melalui adapter; model, library, liveness, dan threshold belum final.
+- Database: PostgreSQL 14+ lokal, driver `pg` Promise API.
+- Authentication: sesi server berbasis cookie; session store PostgreSQL belum diaktifkan pada implementasi saat ini.
+- Attendance evidence: foto privat dan lokasi tervalidasi server; tidak ada pencocokan wajah atau template biometrik.
 - Testing: Vitest untuk unit/integration; E2E ditambahkan saat flow MVP stabil.
 - Tooling: npm, Git, migrasi SQL berversi.
 
@@ -19,21 +19,21 @@ Status proyek: **Draft / MVP**. Aplikasi dikembangkan satu orang untuk satu orga
 
 Root project wajib mengikuti konsep MVC. `views/` adalah aplikasi React/Vite; Model dan Controller berjalan pada server Express.
 
-- `models/`: tipe domain dan query/repository `mysql2`; tidak mengimpor View atau Controller.
+- `models/`: tipe domain dan query/repository `pg`; tidak mengimpor View atau Controller.
 - `controllers/`: menerima HTTP request tervalidasi, memanggil service/model, mengembalikan DTO.
 - `views/`: root React + Vite dengan `src/pages`, `src/components`, `src/api`, `src/styles`.
 - `routes/`: pemetaan endpoint API.
 - `middlewares/`: autentikasi, otorisasi role, CSRF, validasi, rate limit, dan error handling.
 - `services/`: aturan bisnis, transaksi lintas model, idempotency, dan kebijakan presensi.
 - `adapters/`: adapter face engine, session, storage, atau integrasi yang belum dipilih.
-- `config/`: validasi environment, pool MySQL, dan konfigurasi server.
-- `database/migrations/`: SQL berversi untuk MySQL InnoDB.
+- `config/`: validasi environment, pool PostgreSQL, dan konfigurasi server.
+- `database/migrations/`: SQL berversi untuk PostgreSQL.
 - `database/seeds/`: data awal lokal, tanpa kredensial produksi.
 - `tests/`: unit, integration, dan E2E.
 - `docs/`: PRD, BRD, spesifikasi API, runbook, dan keputusan arsitektur.
 - `app.ts` dan `server.ts`: bootstrap Express dan listener Node.js.
 
-Alur dependensi: View mengirim HTTP ke route; middleware memeriksa akses; Controller memanggil service; service menggunakan Model/adapter; Model mengakses MySQL. Browser tidak pernah mengakses MySQL langsung.
+Alur dependensi: View mengirim HTTP ke route; middleware memeriksa akses; Controller memanggil service; service menggunakan Model/adapter; Model mengakses PostgreSQL. Browser tidak pernah mengakses PostgreSQL langsung.
 
 ## Palet Warna & Desain Antarmuka MVP
 
@@ -52,10 +52,10 @@ UI wajib tetap dapat digunakan pada browser HP dan desktop. State loading, koson
 ## Prasyarat
 
 - Node.js 24.x dan npm.
-- MySQL 8+ atau MySQL Laragon.
+- PostgreSQL 14+ atau PostgreSQL local.
 - Git.
 - Browser modern dengan dukungan kamera dan geolocation untuk pengujian presensi.
-- Mesin/model face recognition belum menjadi prasyarat scaffold; integrasinya menunggu gerbang PoC.
+- Pemrosesan foto dan lokasi berjalan melalui validasi server; integrasi kamera tidak menyimpan template biometrik.
 - Docker tidak termasuk stack final. Bagian Docker hanya disediakan sebagai opsi lokal jika nanti konfigurasi container disetujui.
 
 ## Setup Native
@@ -66,22 +66,22 @@ npm install --prefix views
 Copy-Item .env.example .env
 ```
 
-Buat database dan tabel awal pada MySQL Laragon. Jalankan isi migrasi dari:
+Buat database dan tabel awal pada PostgreSQL local. Jalankan isi migrasi dari:
 
 ```text
-database/migrations/001_foundation.sql
+database/migrations/001_baseline.sql
 ```
 
-Atur `.env` untuk MySQL lokal. Jangan commit `.env`:
+Atur `.env` untuk PostgreSQL lokal. Jangan commit `.env`:
 
 ```env
 NODE_ENV=development
 PORT=4000
-MYSQL_HOST=127.0.0.1
-MYSQL_PORT=3306
-MYSQL_DATABASE=sigma_presensi
-MYSQL_USER=root
-MYSQL_PASSWORD=
+PGHOST=127.0.0.1
+PGPORT=5432
+PGDATABASE=sigma_presensi
+PGUSER=postgres
+PGPASSWORD=
 FRONTEND_ORIGIN=http://localhost:5173
 ```
 
@@ -104,18 +104,18 @@ Vite meneruskan request `/api` ke Express hanya saat development. Konfigurasi pr
 
 ## Setup Database
 
-- Laragon menjalankan MySQL lokal.
-- Backend memakai connection pool `mysql2` dan parameterized query.
-- Browser tidak menyimpan atau membaca kredensial MySQL.
+- PostgreSQL berjalan sebagai service lokal terpisah dari Laragon.
+- Backend memakai connection pool `pg` dan parameterized query.
+- Browser tidak menyimpan atau membaca kredensial PostgreSQL.
 - Migrasi dijalankan secara eksplisit dan berversi.
 - Jangan mengubah struktur production secara manual tanpa migrasi dan backup.
 
 ```powershell
-# Jalankan dengan client MySQL Laragon sesuai instalasi lokal
-mysql -u root -p < database/migrations/001_foundation.sql
+# Jalankan dengan client PostgreSQL local sesuai instalasi lokal
+psql -h 127.0.0.1 -U postgres -d sigma_presensi -f database/migrations/001_baseline.sql
 ```
 
-Migration saat ini baru berisi fondasi `users` dan `sessions`. Entitas placement, lokasi berversi, work session, face template, verification, attendance, pengajuan, koreksi, audit, dan token akan ditambahkan bertahap mengikuti implementasi MVP.
+Migration berversi saat ini mencakup fondasi user/session, ERD presensi v0.3, attendance photos, dan cleanup legacy. Entitas operasional lain tetap ditambahkan bertahap mengikuti implementasi MVP.
 
 ## Development dan Production
 
@@ -124,20 +124,22 @@ Development:
 - Browser: `http://localhost:5173`.
 - Express: `http://127.0.0.1:4000`.
 - Vite proxy: `/api` ke Express.
-- MySQL: Laragon atau MySQL lokal.
+- PostgreSQL: Laragon atau PostgreSQL lokal.
 
 Production belum ditetapkan. Rekomendasi sementara adalah satu origin HTTPS dengan reverse proxy yang menyajikan `views/dist/` dan meneruskan `/api` ke Express. Reverse proxy, process manager, hosting, domain, session store, dan secret manager harus diputuskan sebelum deployment.
 
-Konfigurasi development tidak otomatis menjadi konfigurasi production. Production wajib memakai HTTPS, cookie `Secure`, origin CORS eksplisit, secret berbeda, backup, monitoring, dan prosedur restore.
+Konfigurasi development tidak otomatis menjadi konfigurasi production. Production wajib memakai HTTPS, cookie `Secure`, origin CORS eksplisit, secret berbeda, backup, monitoring, prosedur restore, dan job penghapusan foto berdasarkan retention_until.
 
-## Face Recognition dan Presensi Cepat
+## Bukti Foto, Lokasi, dan Presensi Cepat
 
-- Kamera hanya mengambil sampel gambar; browser tidak memutuskan wajah cocok.
-- Backend harus menerima hasil dari mesin/adapter tepercaya yang terikat challenge, peserta, aksi, sesi kerja, versi template, dan expiry.
-- Rekomendasi MVP: verifikasi 1:1, bukan identifikasi 1:N.
-- Enrollment harus melalui pengajuan peserta dan validasi Staff Presensi.
-- Template/embedding diperlakukan sebagai data sensitif; foto asli tidak otomatis disimpan.
-- Threshold, false acceptance, false rejection, liveness, retensi, persetujuan, dan fallback wajib diputuskan setelah PoC.
+- Kamera mengambil foto sebagai bukti; browser tidak menentukan presensi berhasil.
+- Backend mengikat foto, lokasi, peserta, aksi, sesi kerja, dan expiry pada challenge transaksi.
+- MVP tidak memakai identifikasi wajah 1:1 maupun 1:N.
+- Tidak ada enrollment wajah; Staff Presensi memeriksa bukti foto sesuai mandat.
+- Metadata foto disimpan di PostgreSQL; file foto disimpan pada storage privat sesuai retensi.
+- Validasi gambar, ukuran, hash, lokasi, akurasi, usia data, retensi, dan fallback wajib ditetapkan sebelum pilot.
+- Halaman Kelola Data menampilkan tabel attendance photos: peserta, lokasi/waktu foto, batas retensi, serta aksi detail/edit/delete.
+- Super Admin mengatur durasi penghapusan otomatis foto pada Settings; nilai saat ini disimpan sebagai konfigurasi frontend sampai endpoint policy retention tersedia.
 - Presensi dari halaman login tidak menerbitkan sesi dashboard dan tidak boleh membocorkan profil berdasarkan kode peserta.
 
 ## Role MVP
@@ -146,7 +148,7 @@ Konfigurasi development tidak otomatis menjadi konfigurasi production. Productio
 | --- | --- |
 | Peserta | Aktivasi akun, enrollment wajah sendiri, presensi, izin/sakit, histori, dan koreksi. |
 | Staff Presensi | Peserta/placement, validasi enrollment, jadwal/lokasi sesuai mandat, keputusan pengajuan, koreksi, rekap, audit operasional. |
-| Super Admin | Akun petugas, kebijakan teknis, keamanan, audit sistem, pencabutan akses, backup/restore, retensi dan penghapusan sesuai kebijakan. |
+| Super Admin | Akun petugas, kebijakan teknis, keamanan, pencabutan akses, backup/restore, tabel attendance photos, retensi dan penghapusan sesuai kebijakan. |
 
 Tidak ada pendaftaran publik bebas, SSO, role keempat, payroll, HRIS, mobile native, offline otomatis, atau pengelolaan seluruh pegawai dalam MVP.
 
@@ -156,9 +158,9 @@ Password semua akun: `password`.
 
 | Role | Email |
 | --- | --- |
-| Peserta Magang / PKL | `` |
-| Staff Presensi | `` |
-| Admin Platform | `adminsigma_2@example.com` |
+| Peserta Magang / PKL | `peserta.pkl1@example.com` / `peserta.pkl2@example.com` / `peserta.pkl3@example.com` |
+| Staff Presensi | `staff.presensi1@example.com` / `staff.presensi2@example.com` / `staff.presensi3@example.com` |
+| Admin Platform | `adminsigma@example.com` / `adminsigma_2@example.com` / `adminsigma_3@example.com` |
 
 ## Test dan Build
 
@@ -177,18 +179,26 @@ Invoke-RestMethod http://127.0.0.1:4000/api/health
 Pengujian berikut menjadi target bertahap:
 
 - Unit rule status akun, sesi, idempotency, tanggal kerja, dan otorisasi.
-- Integration Express + MySQL test database.
+- Integration Express + PostgreSQL test database.
 - E2E login, absensi sukses/gagal, izin, koreksi, expiry, dan retry timeout.
-- PoC face recognition dengan dataset berizin dan metrik FAR/FRR.
+- Uji kamera, lokasi, upload foto, retensi, dan restore sebelum pilot.
 - Uji restore database sebelum pilot.
 
 ## Keamanan Repository
 
-- Jangan commit `.env`, password database, session secret, token reset, embedding, foto wajah, atau kredensial deployment.
+- Jangan commit `.env`, password database, session secret, token reset, foto privat, atau kredensial deployment.
 - Gunakan `.env.example` hanya sebagai template tanpa nilai rahasia.
-- Semua query MySQL memakai parameter binding.
+- Semua query PostgreSQL memakai parameter binding.
 - Semua perubahan state memiliki validasi backend, otorisasi role, dan audit event.
 - Cookie sesi production wajib `HttpOnly`, `Secure`, dan `SameSite` sesuai arsitektur deployment.
 - State-changing request berbasis cookie wajib memiliki perlindungan CSRF.
 - CORS tidak boleh memakai wildcard bersama credentials.
-- Jangan menganggap geolocation browser atau face recognition sebagai pencegahan kecurangan mutlak.
+- Jangan menganggap geolocation browser atau foto sebagai pencegahan kecurangan mutlak.
+
+
+
+
+
+
+
+

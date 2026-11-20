@@ -71,7 +71,7 @@ sigma-presensi/
 │   └── seeds/             # Seed lokal tanpa secret produksi
 ├── docs/                  # Dokumentasi teknis, API, runbook, dan keputusan
 ├── middlewares/           # Auth, role, CSRF, validasi, rate limit, error handler
-├── models/                # Entitas, tipe domain, repository, dan query mysql2
+├── models/                # Entitas, tipe domain, repository, dan query pg
 ├── routes/                # Pemetaan endpoint ke controller
 ├── services/              # Aturan bisnis dan transaksi lintas model
 ├── tests/                 # Unit, integration, dan E2E test
@@ -98,7 +98,7 @@ sigma-presensi/
 - Jangan membuat folder `frontend/` atau `backend/` jika struktur root MVC sudah ditetapkan.
 - React/Vite wajib berada di `views/`.
 - Model dan Controller backend berada di root project.
-- Query MySQL hanya berada di `models/` atau repository yang secara eksplisit berada di bawah tanggung jawab Model.
+- Query PostgreSQL hanya berada di `models/` atau repository yang secara eksplisit berada di bawah tanggung jawab Model.
 - Controller memanggil service/model; Controller tidak menulis query SQL.
 - Service memuat aturan bisnis; Service tidak merender UI.
 - Route hanya memetakan endpoint dan middleware; jangan menaruh business logic panjang di route.
@@ -112,7 +112,7 @@ sigma-presensi/
 - Front-End menggunakan React, Vite, dan TypeScript.
 - Styling menggunakan CSS Modules dan CSS global; jangan menambahkan Tailwind CSS.
 - Front-End berkomunikasi dengan Back-End melalui HTTP API.
-- Front-End tidak boleh mengakses MySQL atau membaca secret backend.
+- Front-End tidak boleh mengakses PostgreSQL atau membaca secret backend.
 - Vite proxy `/api` hanya berlaku untuk development.
 - Status loading, empty, success, failure, unauthorized, session expired, permission camera, permission location, dan retry timeout harus ditangani secara eksplisit bila relevan.
 - Front-End tidak boleh menentukan sendiri bahwa wajah cocok, lokasi valid, atau presensi berhasil.
@@ -123,8 +123,8 @@ sigma-presensi/
 ## 6. Aturan Back-End
 
 - Back-End menggunakan Node.js, Express, dan TypeScript.
-- Hanya Back-End yang mengakses MySQL.
-- Gunakan `mysql2` Promise API, connection pool, parameter binding, dan transaksi untuk operasi atomik.
+- Hanya Back-End yang mengakses PostgreSQL.
+- Gunakan `pg` Promise API, connection pool, parameter binding, dan transaksi untuk operasi atomik.
 - Validasi request dilakukan di server.
 - Otorisasi role dan kepemilikan resource wajib ditegakkan di Back-End pada setiap endpoint yang relevan.
 - Sesi autentikasi server menggunakan cookie yang aman sesuai environment.
@@ -138,7 +138,7 @@ sigma-presensi/
 
 ## 7. Aturan Database
 
-- Database menggunakan MySQL InnoDB.
+- Database menggunakan PostgreSQL.
 - Skema dibuat melalui migrasi SQL berversi.
 - Jangan mengubah database production secara manual tanpa migrasi dan backup.
 - Gunakan foreign key, unique constraint, index, dan transaction boundary sesuai requirement.
@@ -152,7 +152,7 @@ sigma-presensi/
 ## 8. Prosedur Sebelum Implementasi
 
 1. Baca prompt user dan requirement terkait.
-2. Baca `README.md`, `PRD-SIGMA.md`, `BACK-END.md`, dan aturan repository yang berlaku.
+2. Baca `README.md`, `PRD-SIGMA-v.03.md`, `BACK-END.md`, dan aturan repository yang berlaku.
 3. Periksa struktur serta perubahan lokal sebelum menyentuh file.
 4. Tentukan file yang benar-benar perlu diubah.
 5. Pastikan perubahan tidak menambah fitur atau struktur di luar instruksi.
@@ -177,3 +177,7 @@ sigma-presensi/
 - Aturan keamanan, privasi, dan integritas data tidak boleh dihilangkan untuk mempercepat pengerjaan.
 - Jika dua requirement bertentangan, jangan memilih diam-diam. Tunjukkan konflik, jelaskan dampak, dan minta keputusan atau gunakan keputusan eksplisit yang sudah tersedia.
 - Jangan mengklaim fitur selesai jika baru berupa scaffold, mock, placeholder, atau PoC.
+
+
+
+

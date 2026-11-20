@@ -1,0 +1,1 @@
+.map{width:100%;min-height:360px;overflow:hidden;border:1px solid var(--sigma-border-sub);border-radius:10px;background:#d8e2f0}.map :global(.leaflet-control-attribution){font-size:10px}.map :global(.leaflet-control-zoom a){color:var(--sigma-navy)}.map :global(.leaflet-marker-icon){filter:drop-shadow(0 2px 2px rgba(36,78,150,.22))}@media(max-width:700px){.map{min-height:300px}}

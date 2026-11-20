@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import '../../styles/Login.css';
+import { cacheUser } from '../../api/authSession';
 
-type LoginResponse = { user: { role: string } };
+type LoginResponse = { user: { id: string; name: string; email: string | null; role: string } };
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,6 +25,7 @@ export default function Login() {
       const data = (await response.json()) as LoginResponse & { message?: string };
 
       if (!response.ok) throw new Error(data.message ?? 'Login gagal');
+      cacheUser(data.user);
       window.location.assign(data.user.role === 'super_admin' ? '/admin/dashboard' : '/');
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : 'Login gagal');
@@ -52,9 +54,11 @@ export default function Login() {
           <button className="login-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Memproses...' : 'Masuk'}</button>
           <p className="login-message" role="status" aria-live="polite">{message}</p>
         </form>
+        <a className="login-forgot" href="/auth/forget-password">Lupa password?</a>
         <footer className="login-footer">PT. Vaiotech Lintas Nusantara</footer>
       </section>
     </main>
   );
 }
+
 
