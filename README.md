@@ -12,6 +12,9 @@ Status proyek: **Draft / MVP**. Aplikasi dikembangkan satu orang untuk satu orga
 - Database: PostgreSQL 14+ lokal, driver `pg` Promise API.
 - Authentication: sesi server berbasis cookie; session store PostgreSQL belum diaktifkan pada implementasi saat ini.
 - Attendance evidence: foto privat dan lokasi tervalidasi server; tidak ada pencocokan wajah atau template biometrik.
+- Maps: Leaflet dengan OpenStreetMap tiles untuk tampilan dan pengaturan lokasi/radius presensi.
+- Browser location: Browser Geolocation API untuk mengambil koordinat perangkat dengan persetujuan pengguna.
+- Distance validation: Backend Haversine distance check untuk memvalidasi jarak perangkat terhadap lokasi terdaftar.
 - Testing: Vitest untuk unit/integration; E2E ditambahkan saat flow MVP stabil.
 - Tooling: npm, Git, migrasi SQL berversi.
 

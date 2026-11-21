@@ -39,7 +39,7 @@ async function main(): Promise<void> {
 
     const passwordHash = await hashPassword(user.password);
     await pool.query(
-      `INSERT INTO users (name, email, password_hash, role, status)
+      `INSERT INTO users (user_name, email, password_hash, role, status)
        VALUES ($1, $2, $3, $4, $5)`,
       [user.name, user.email, passwordHash, user.role, user.status],
     );
@@ -56,5 +56,6 @@ try {
 } finally {
   await pool.end();
 }
+
 
 

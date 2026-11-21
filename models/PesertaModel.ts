@@ -9,7 +9,8 @@ export interface PesertaRow extends QueryResultRow {
   user_id: string;
   nama_lengkap: string;
   no_telp: string;
-  institut_pendidikan: InstitutPendidikan;
+  jenis_institut_pendidikan: InstitutPendidikan;
+  nama_institut_pendidikan: string;
   jenis_prakerin: JenisPrakerin;
   mulai_prakerin: string;
   selesai_prakerin: string;
@@ -20,7 +21,7 @@ export interface PesertaRow extends QueryResultRow {
 
 const table = 'sigma_presensi.peserta';
 const columns = `id::text AS id, user_id::text AS user_id, nama_lengkap, no_telp,
-  institut_pendidikan, jenis_prakerin, mulai_prakerin, selesai_prakerin,
+  jenis_institut_pendidikan, nama_institut_pendidikan, jenis_prakerin, mulai_prakerin, selesai_prakerin,
   created_at, updated_at, deleted_at`;
 
 export const PesertaModel = {
@@ -34,9 +35,9 @@ export const PesertaModel = {
   },
   async create(input: Omit<PesertaRow, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>): Promise<PesertaRow> {
     const result = await pool.query<PesertaRow>(
-      `INSERT INTO ${table} (user_id, nama_lengkap, no_telp, institut_pendidikan, jenis_prakerin, mulai_prakerin, selesai_prakerin)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING ${columns}`,
-      [input.user_id, input.nama_lengkap, input.no_telp, input.institut_pendidikan, input.jenis_prakerin, input.mulai_prakerin, input.selesai_prakerin],
+      `INSERT INTO ${table} (user_id, nama_lengkap, no_telp, jenis_institut_pendidikan, nama_institut_pendidikan, jenis_prakerin, mulai_prakerin, selesai_prakerin)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ${columns}`,
+      [input.user_id, input.nama_lengkap, input.no_telp, input.jenis_institut_pendidikan, input.nama_institut_pendidikan, input.jenis_prakerin, input.mulai_prakerin, input.selesai_prakerin],
     );
     const peserta = result.rows[0];
     if (!peserta) throw new Error('PESERTA_CREATE_FAILED');

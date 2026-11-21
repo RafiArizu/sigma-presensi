@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
 import AdminDashboard from './pages/Admin/dashboard/dashboardPage';
+import StaffDashboard from './pages/Staff/dashboard/dashboardPage';
+import StaffAttendanceMonitorPage from './pages/Staff/pantau-presensi/pantauPresensiPage';
+import StaffParticipantsPage from './pages/Staff/peserta/pesertaPenempatanPage';
+import PengajuanIzinPage from './pages/Staff/pengajuan-izin/pengajuanIzinPage';
+import StaffScheduleLocationPage from './pages/Staff/jadwal-lokasi/jadwalLokasiPage';
+import StaffAttendanceRecapPage from './pages/Staff/rekapPresensiPage';
 import DataGovernancePage from './pages/Admin/data-governance/dataGovernancePage';
 import UserListPage from './pages/Admin/users/userListPage';
 import UserCreatePage from './pages/Admin/users/userCreatePage';
@@ -14,14 +20,20 @@ import Login from './pages/Auth/loginPage';
 import ForgetPasswordPage from './pages/Auth/forget-password';
 import ResetPasswordPage from './pages/Auth/reset-password';
 
-type Page = 'forgot-password' | 'reset-password' | 'login' | 'admin-dashboard' | 'data-governance' | 'lokasi' | 'lokasi-create' | 'lokasi-detail' | 'lokasi-edit' | 'users' | 'user-create' | 'user-detail' | 'user-edit' | 'settings' | 'not-found';
+type Page = 'forgot-password' | 'reset-password' | 'login' | 'admin-dashboard' | 'staff-dashboard' | 'staff-monitor' | 'staff-participants' | 'staff-leave' | 'staff-schedule-location' | 'staff-recap' | 'data-governance' | 'lokasi' | 'lokasi-create' | 'lokasi-detail' | 'lokasi-edit' | 'users' | 'user-create' | 'user-detail' | 'user-edit' | 'settings' | 'not-found';
 
 function getPage(pathname: string): Page {
   const path = pathname.toLowerCase();
   if (path === '/login' || path === '/auth/login' || path === '/') return 'login';
   if (path === '/auth/forget-password' || path === '/forget-password') return 'forgot-password';
   if (path === '/auth/reset-password' || path === '/reset-password') return 'reset-password';
-  if (path === '/super-admin/dashboard' || path === '/admin/dashboard' || path === '/admin/dashboard/index') return 'admin-dashboard';
+  if (path === '/super-admin/dashboard') return 'admin-dashboard';
+  if (path === '/staff/dashboard' || path === '/staff/dashboard/') return 'staff-dashboard';
+  if (path === '/staff/pantau-presensi' || path === '/staff/pantau-presensi/') return 'staff-monitor';
+  if (path === '/staff/peserta' || path === '/staff/peserta/') return 'staff-participants';
+  if (path === '/staff/izin-kehadiran' || path === '/staff/izin-kehadiran/') return 'staff-leave';
+  if (path === '/staff/jadwal-lokasi' || path === '/staff/jadwal-lokasi/') return 'staff-schedule-location';
+  if (path === '/staff/rekap' || path === '/staff/rekap/') return 'staff-recap';
   if (path === '/super-admin/data-governance' || path === '/super-admin/data-governance/') return 'data-governance';
   if (path === '/super-admin/lokasi/create') return 'lokasi-create';
   if (/^\/super-admin\/lokasi\/[^/]+\/edit$/.test(path)) return 'lokasi-edit';
@@ -66,6 +78,12 @@ export function App() {
   if (page === 'forgot-password') return <ForgetPasswordPage />;
   if (page === 'reset-password') return <ResetPasswordPage />;
   if (page === 'admin-dashboard') return <AdminDashboard />;
+  if (page === 'staff-dashboard') return <StaffDashboard />;
+  if (page === 'staff-monitor') return <StaffAttendanceMonitorPage />;
+  if (page === 'staff-participants') return <StaffParticipantsPage />;
+  if (page === 'staff-leave') return <PengajuanIzinPage />;
+  if (page === 'staff-schedule-location') return <StaffScheduleLocationPage />;
+  if (page === 'staff-recap') return <StaffAttendanceRecapPage />;
   if (page === 'data-governance') return <DataGovernancePage />;
   if (page === 'lokasi-create') return <LokasiCreatePage />;
   if (page === 'lokasi-detail') return <LokasiDetailPage />;
@@ -76,6 +94,24 @@ export function App() {
   if (page === 'user-detail') return <UserDetailPage />;
   if (page === 'user-edit') return <UserEditPage />;
   if (page === 'settings') return <SettingPage />;
-  return <main className="not-found-page"><p className="header-kicker">SIGMA / 404</p><h1>Halaman tidak ditemukan.</h1><a href="/login">Kembali ke login</a></main>;
+  return (
+    <main className="not-found-page">
+      <section className="not-found-card" aria-labelledby="not-found-title">
+        <div className="not-found-mark" aria-hidden="true">404</div>
+        <p className="not-found-kicker">SIGMA / HALAMAN ERROR</p>
+        <h1 id="not-found-title">Halaman tidak ditemukan.</h1>
+        <p className="not-found-copy">Alamat yang kamu buka tidak tersedia atau sudah dipindahkan.</p>
+        <a className="not-found-action" href="/login">Kembali ke login</a>
+      </section>
+    </main>
+  );
 }
+
+
+
+
+
+
+
+
 

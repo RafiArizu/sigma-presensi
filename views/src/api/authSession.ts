@@ -1,6 +1,7 @@
 export type CachedUser = {
   id: string;
   name: string;
+  user_name?: string;
   email: string | null;
   role: string;
 };
@@ -29,4 +30,6 @@ export function clearCachedUser(): void {
   } catch {
   }
 }
+
+
 

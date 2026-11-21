@@ -1,0 +1,23 @@
+import { useEffect, useMemo, useState } from 'react';
+import UsersPageShell from '../../Admin/users/usersPageShell';
+import '../../../styles/AdminDashboard.css';
+import PengajuanIzinEdit, { type LeaveRequest } from './pengajuanIzinEdit';
+
+type Filter = 'Semua' | LeaveRequest['status'];
+function formatDate(value: string) { const date = new Date(value.includes('T') ? value : value + 'T00:00:00'); return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(date); }
+function statusClass(status: LeaveRequest['status']) { return status === 'Disetujui' ? 'approved' : status === 'Ditolak' ? 'rejected' : 'pending'; }
+
+export default function PengajuanIzinPage() {
+  const [requests, setRequests] = useState<LeaveRequest[]>([]);
+  const [filter, setFilter] = useState<Filter>('Semua');
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<LeaveRequest | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  useEffect(() => { fetch('/api/staff/leave-requests', { credentials: 'include', cache: 'no-store' }).then(async (response) => { const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(typeof data.message === 'string' ? data.message : 'Pengajuan izin gagal dimuat'); setRequests(Array.isArray(data.requests) ? data.requests : []); }).catch((cause) => setError(cause instanceof Error ? cause.message : 'Pengajuan izin gagal dimuat')).finally(() => setLoading(false)); }, []);
+  const visible = useMemo(() => requests.filter((request) => (filter === 'Semua' || request.status === filter) && `${request.participant_name} ${request.leave_type} ${request.reason}`.toLowerCase().includes(query.toLowerCase())), [filter, query, requests]);
+  function saveRequest(request: LeaveRequest) { setRequests((current) => current.map((item) => item.id === request.id ? request : item)); setSelected(null); setNotice('Pengajuan izin berhasil diperbarui.'); }
+  return <UsersPageShell role="staff_presensi" eyebrow="STAFF PRESENSI" title="Pengajuan Izin" description="Tinjau dan kelola pengajuan izin kehadiran peserta."><div className="staff-leave-page"><section className="staff-input-card"><div><span className="staff-input-card-kicker">KONTROL PENGAJUAN</span><h1>Pengajuan Izin</h1><p>Periksa alasan, tanggal, dan status pengajuan peserta.</p></div><div className="staff-leave-summary"><strong>{requests.filter((item) => item.status === 'Menunggu').length}</strong><span>menunggu ditinjau</span></div></section>{error && <p className="dashboard-stats-note" role="alert">{error}</p>}{notice && <p className="dashboard-stats-note staff-participants-success" role="status">{notice}</p>}<section className="staff-leave-card"><div className="staff-leave-toolbar"><div><span className="admin-kicker">DAFTAR PENGAJUAN</span><h2>Pengajuan izin peserta</h2></div><div className="staff-leave-filters"><label><span>Cari pengajuan</span><input aria-label="Cari pengajuan" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari peserta atau alasan" /></label><label><span>Filter status</span><select aria-label="Filter status" value={filter} onChange={(event) => setFilter(event.target.value as Filter)}><option>Semua</option><option>Menunggu</option><option>Disetujui</option><option>Ditolak</option></select></label></div></div><div className="staff-leave-table-wrap"><table className="staff-leave-table"><thead><tr><th>Peserta</th><th>Jenis izin</th><th>Tanggal</th><th>Alasan</th><th>Status</th><th>Aksi</th></tr></thead><tbody>{loading ? <tr><td colSpan={6} className="staff-leave-empty">Memuat pengajuan...</td></tr> : visible.length ? visible.map((request) => <tr key={request.id}><td><strong>{request.participant_name}</strong></td><td>{request.leave_type}</td><td>{formatDate(request.request_date)}</td><td className="staff-leave-reason">{request.reason}</td><td><span className={`staff-leave-status staff-leave-status-${statusClass(request.status)}`}>{request.status}</span></td><td><button className="table-edit-action" type="button" onClick={() => setSelected(request)}>Tinjau</button></td></tr>) : <tr><td colSpan={6} className="staff-leave-empty"><strong>{requests.length ? 'Pengajuan tidak ditemukan' : 'Belum ada pengajuan izin'}</strong><span>{requests.length ? 'Coba ubah kata kunci atau filter status.' : 'Pengajuan peserta akan muncul di sini saat tersedia.'}</span></td></tr>}</tbody></table></div></section></div>{selected && <PengajuanIzinEdit request={selected} onClose={() => setSelected(null)} onSaved={saveRequest} />}</UsersPageShell>;
+}
+

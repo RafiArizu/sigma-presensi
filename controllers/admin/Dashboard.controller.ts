@@ -19,7 +19,7 @@ export const dashboardStatsController: RequestHandler = async (_request, respons
           CURRENT_DATE,
           INTERVAL '1 day'
         ) AS days(day)
-        LEFT JOIN sigma_presensi.attandance a
+        LEFT JOIN sigma_presensi.attendance a
           ON a.occurred_at_server >= days.day
          AND a.occurred_at_server < days.day + INTERVAL '1 day'
         GROUP BY day
@@ -52,3 +52,4 @@ export const dashboardStatsController: RequestHandler = async (_request, respons
     next(error);
   }
 };
+

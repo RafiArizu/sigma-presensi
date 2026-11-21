@@ -13,7 +13,7 @@ export default function LokasiCreatePage() {
     const form = new FormData(event.currentTarget);
     const response = await fetch('/api/admin/locations', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ alamat: form.get('alamat'), status: form.get('status'), ...coordinates }) });
     if (!response.ok) { const body = await response.json().catch(() => null) as { message?: string } | null; setError(body?.message ?? 'Lokasi gagal disimpan'); setSaving(false); return; }
-    window.history.pushState({}, '', '/super-admin/lokasi'); window.dispatchEvent(new PopStateEvent('popstate'));
+    window.sessionStorage.setItem('sigma-location-feedback', 'Lokasi Berhasil Ditambahkan'); window.history.pushState({}, '', '/super-admin/lokasi'); window.dispatchEvent(new PopStateEvent('popstate'));
   };
 
   return <UsersPageShell eyebrow="SUPER ADMIN / LOKASI / NEW" title="Tambah lokasi" description="Tentukan titik presensi dan radius yang berlaku."><form className={styles.form} onSubmit={submit}>

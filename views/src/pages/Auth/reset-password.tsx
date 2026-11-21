@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import '../../styles/Login.css';
+import AuthMessage from '../../components/AuthMessage';
 
 const OTP_LENGTH = 6;
 const OTP_DURATION = 60;
@@ -84,11 +85,11 @@ export default function ResetPasswordPage() {
             <div className="login-field"><label htmlFor="password-confirmation">Konfirmasi password baru</label><input id="password-confirmation" name="password-confirmation" type="password" autoComplete="new-password" placeholder="Ulangi password baru" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} minLength={8} maxLength={128} required /></div>
             <button className="login-submit" type="submit">Simpan password baru</button>
           </>}
-          <p className="login-message" role="status" aria-live="polite">{message}</p>
         </form>
         <div className="login-link-row"><a className="login-back" href="/auth/forget-password">Ganti email</a>{!isExpired && !isOtpVerified && <span className="otp-hint">Cek inbox dan spam</span>}</div>
         <footer className="login-footer">PT. Vaiotech Lintas Nusantara</footer>
       </section>
+      <AuthMessage message={message} tone={message.includes('benar') || message.includes('dikirim') ? 'success' : 'error'} onClose={() => setMessage('')} />
     </main>
   );
 }

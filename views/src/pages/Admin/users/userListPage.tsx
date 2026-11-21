@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import UsersPageShell from './usersPageShell';
 import { UserCreateForm } from './userCreatePage';
+import { UserEditForm } from './userEditPage';
+import { UserDetailCard } from './userDetailPage';
 import locationStyles from '../../../styles/lokasiPage.module.css';
 type UserSummaryIcon = 'users' | 'staff' | 'participants';
 
@@ -34,6 +36,8 @@ export default function UserListPage() {
   const [error, setError] = useState('');
   const [pendingDelete, setPendingDelete] = useState<UserRecord | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [viewingUser, setViewingUser] = useState<UserRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -48,9 +52,9 @@ export default function UserListPage() {
   }, []);
 
   useEffect(() => {
-    if (!pendingDelete && !isCreateOpen) return;
+    if (!pendingDelete && !isCreateOpen && !editingUser && !viewingUser) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isDeleting) { setPendingDelete(null); setCreateOpen(false); }
+      if (event.key === 'Escape' && !isDeleting) { setPendingDelete(null); setCreateOpen(false); setEditingUser(null); setViewingUser(null); }
     };
     document.addEventListener('keydown', handleKeyDown);
     document.body.style.overflow = 'hidden';
@@ -58,7 +62,7 @@ export default function UserListPage() {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [pendingDelete, isCreateOpen, isDeleting]);
+  }, [pendingDelete, isCreateOpen, editingUser, viewingUser, isDeleting]);
 
   const query = activeSearch.trim().toLowerCase();
   const filteredUsers = users.filter((user) => {
@@ -94,9 +98,11 @@ export default function UserListPage() {
       <section className="users-table-card" aria-label="User terdaftar">
         {error && <p className="form-error">{error}</p>}
         <table className="users-table"><thead><tr><th>Nama User</th><th>Email</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
-          {isLoading ? <tr><td colSpan={5} className="users-empty">Memuat user...</td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => <tr key={user.id}><td><strong>{user.name}</strong></td><td><span className="user-email">{user.email ?? '-'}</span></td><td><span className={`role-pill role-${roleClass(user.role)}`}>{user.role === 'staff_presensi' ? 'Staff Presensi' : user.role === 'peserta' ? 'Peserta Prakerin' : user.role}</span></td><td><span className={`status-pill status-${statusClass(user.status)}`}>{user.status === 'active' ? 'Aktif' : user.status === 'inactive' ? 'Non Aktif' : user.status}</span></td><td><div className="user-row-actions"><a href={`/super-admin/users/${user.id}`}>Detail ↗</a><a href={`/super-admin/users/${user.id}/edit`}>Edit ↗</a><button className="table-delete-action" type="button" onClick={() => setPendingDelete(user)}>Hapus</button></div></td></tr>) : <tr><td className="users-empty" colSpan={5}>Tidak ada user yang sesuai filter.</td></tr>}
+          {isLoading ? <tr><td colSpan={5} className="users-empty">Memuat user...</td></tr> : filteredUsers.length > 0 ? filteredUsers.map((user) => <tr key={user.id}><td><strong>{user.name}</strong></td><td><span className="user-email">{user.email ?? '-'}</span></td><td><span className={`role-pill role-${roleClass(user.role)}`}>{user.role}</span></td><td><span className={`status-pill status-${statusClass(user.status)}`}>{user.status === 'active' ? 'Aktif' : user.status === 'inactive' ? 'Non Aktif' : user.status}</span></td><td><div className="user-row-actions"><button type="button" className="table-detail-action" onClick={() => setViewingUser(user)}>Detail ↗</button><button type="button" className="table-edit-action" onClick={() => setEditingUser(user)}>Edit ↗</button><button className="table-delete-action" type="button" onClick={() => setPendingDelete(user)}>Hapus</button></div></td></tr>) : <tr><td className="users-empty" colSpan={5}>Tidak ada user yang sesuai filter.</td></tr>}
         </tbody></table>
       </section>
+      {viewingUser && <div className="user-create-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setViewingUser(null); }}><section className="user-create-modal user-detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-user-title"><UserDetailCard userId={viewingUser.id} onClose={() => setViewingUser(null)} /></section></div>}
+      {editingUser && <div className="user-create-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditingUser(null); setViewingUser(null); }}><section className="user-create-modal" role="dialog" aria-modal="true" aria-labelledby="edit-user-title"><UserEditForm userId={editingUser.id} onCancel={() => setEditingUser(null)} onSuccess={() => { setEditingUser(null); setViewingUser(null); window.location.reload(); }} /></section></div>}
       {isCreateOpen && <div className="user-create-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setCreateOpen(false); }}><section className="user-create-modal" role="dialog" aria-modal="true" aria-labelledby="create-user-title"><UserCreateForm onCancel={() => setCreateOpen(false)} onSuccess={(userId) => { setCreateOpen(false); window.history.pushState({}, "", `/super-admin/users/${userId}`); window.dispatchEvent(new PopStateEvent("popstate")); }} /></section></div>}
       {pendingDelete && <div className="user-delete-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) setPendingDelete(null); }}>
         <section className="user-delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-user-title" aria-describedby="delete-user-description">

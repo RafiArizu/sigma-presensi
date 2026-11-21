@@ -15,8 +15,8 @@ const createSchema = z.object({ ...userFields, password: z.string().min(8).max(1
 const updateSchema = z.object({ ...userFields, password: z.string().min(8).max(128).optional().or(z.literal('')) });
 const idSchema = z.string().regex(/^\d+$/, 'ID user tidak valid');
 
-function publicUser(user: { id: string; name: string; email: string | null; role: UserRole; status: UserStatus }) {
-  return { id: user.id, name: user.name, email: user.email, role: user.role, status: user.status };
+function publicUser(user: { id: string; user_name: string; email: string | null; role: UserRole; status: UserStatus }) {
+  return { id: user.id, name: user.user_name, user_name: user.user_name, email: user.email, role: user.role, status: user.status };
 }
 
 function isDuplicateError(error: unknown): boolean {
@@ -44,7 +44,7 @@ const create: RequestHandler = async (request, response, next) => {
   try {
     const input = createSchema.safeParse(request.body);
     if (!input.success) { response.status(400).json({ code: 'INVALID_USER_INPUT', message: 'Data user tidak valid', details: input.error.flatten().fieldErrors }); return; }
-    const user = await UserModel.create({ ...input.data, passwordHash: await hashPassword(input.data.password) });
+    const user = await UserModel.create({ userName: input.data.name, email: input.data.email, role: input.data.role, status: input.data.status, passwordHash: await hashPassword(input.data.password) });
     response.status(201).json({ user: publicUser(user) });
   } catch (error) {
     if (isDuplicateError(error)) { response.status(409).json({ code: 'USER_EMAIL_EXISTS', message: 'Email user sudah digunakan' }); return; }
@@ -60,7 +60,7 @@ const update: RequestHandler = async (request, response, next) => {
     if (!input.success) { response.status(400).json({ code: 'INVALID_USER_INPUT', message: 'Data user tidak valid', details: input.error.flatten().fieldErrors }); return; }
     const existing = await UserModel.findById(id.data);
     if (!existing || existing.role === 'super_admin') { response.status(404).json({ code: 'USER_NOT_FOUND', message: 'User tidak ditemukan' }); return; }
-    const user = await UserModel.update(id.data, { ...input.data, passwordHash: input.data.password ? await hashPassword(input.data.password) : undefined });
+    const user = await UserModel.update(id.data, { userName: input.data.name, email: input.data.email, role: input.data.role, status: input.data.status, passwordHash: input.data.password ? await hashPassword(input.data.password) : undefined });
     if (!user) { response.status(404).json({ code: 'USER_NOT_FOUND', message: 'User tidak ditemukan' }); return; }
     response.json({ user: publicUser(user) });
   } catch (error) {
@@ -83,6 +83,8 @@ const remove: RequestHandler = async (request, response, next) => {
 };
 
 export const userController = { list, detail, create, update, remove };
+
+
 
 
 

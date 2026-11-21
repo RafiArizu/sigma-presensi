@@ -13,7 +13,9 @@
     "build:server": "tsc -p tsconfig.json",
     "build:client": "npm --prefix views run build",
     "start": "node dist/server.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:seed:attendance": "tsx database/seeds/seedAttendance.ts",
+    "db:seed:peserta": "tsx database/seeds/seedPeserta.ts"
   },
   "dependencies": {
     "@types/connect-pg-simple": "^7.0.3",

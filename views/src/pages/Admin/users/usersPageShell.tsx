@@ -12,9 +12,10 @@ type UsersPageShellProps = {
   eyebrow: string;
   title: string;
   description: string;
+  role?: UserRole;
 };
 
-export default function UsersPageShell({ children, eyebrow, title, description }: UsersPageShellProps) {
+export default function UsersPageShell({ children, eyebrow, title, description, role = 'super_admin' }: UsersPageShellProps) {
   const [user, setUser] = useState<CurrentUser | null>(() => getCachedUser<CurrentUser>());
   const [error, setError] = useState('');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function UsersPageShell({ children, eyebrow, title, description }
         return response.json() as Promise<{ user: CurrentUser }>;
       })
       .then(({ user: currentUser }) => {
-        if (currentUser.role !== 'super_admin') throw new Error('Akses hanya untuk Super Admin');
+        if (currentUser.role !== role) throw new Error(role === 'staff_presensi' ? 'Akses hanya untuk Staff Presensi' : 'Akses hanya untuk Super Admin');
         cacheUser(currentUser);
         setUser(currentUser);
       })
@@ -46,13 +47,13 @@ export default function UsersPageShell({ children, eyebrow, title, description }
     );
   }
 
-  if (!user) return null;
+  if (!user) return <main className="admin-shell admin-shell-message"><section className="admin-panel"><p className="admin-kicker">SIGMA / STAFF PRESENSI</p><h1>Memuat halaman...</h1><p>Memeriksa sesi dan akses pengguna.</p></section></main>;
 
   return (
     <div className="admin-shell">
-      <Sidebar currentPath={window.location.pathname} isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} role="super_admin" />
+      <Sidebar currentPath={window.location.pathname} isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} role={role} />
       <div className="admin-main">
-        <Header userName={user.name} role="super_admin" onMenuToggle={() => setSidebarOpen(true)} />
+        <Header userName={user.name} role={role} onMenuToggle={() => setSidebarOpen(true)} />
         <main className="admin-content">
           {children}
         </main>
@@ -61,3 +62,4 @@ export default function UsersPageShell({ children, eyebrow, title, description }
     </div>
   );
 }
+

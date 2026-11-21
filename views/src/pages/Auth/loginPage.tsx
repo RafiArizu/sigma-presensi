@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import '../../styles/Login.css';
 import { cacheUser } from '../../api/authSession';
+import AuthMessage from '../../components/AuthMessage';
 
-type LoginResponse = { user: { id: string; name: string; email: string | null; role: string } };
+type LoginResponse = { user: { id: string; name: string; user_name: string; email: string | null; role: string } };
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,13 +21,24 @@ export default function Login() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       });
-      const data = (await response.json()) as LoginResponse & { message?: string };
+      const rawResponse = await response.text();
+      let data: (LoginResponse & { message?: string }) | null = null;
+      if (rawResponse.trim()) {
+        try { data = JSON.parse(rawResponse) as LoginResponse & { message?: string }; }
+        catch { data = null; }
+      }
 
-      if (!response.ok) throw new Error(data.message ?? 'Login gagal');
+      if (!response.ok) throw new Error(data?.message ?? ('Server gagal memproses login (HTTP ' + response.status + ').'));
+      if (!data?.user) throw new Error('Response login tidak valid. Coba muat ulang halaman.');
       cacheUser(data.user);
-      window.location.assign(data.user.role === 'super_admin' ? '/admin/dashboard' : '/');
+      const redirectPath = data.user.role === 'super_admin'
+        ? '/super-admin/dashboard'
+        : data.user.role === 'staff_presensi'
+          ? '/staff/dashboard'
+          : '/peserta/dashboard';
+      window.location.assign(redirectPath);
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : 'Login gagal');
     } finally {
@@ -44,21 +56,23 @@ export default function Login() {
         </header>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-field">
-            <label htmlFor="email">Email</label>
-            <input id="email" name="email" type="email" autoComplete="username" placeholder="nama@contoh.com" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} required />
+            <label htmlFor="identifier">Email atau username</label>
+            <input id="identifier" name="identifier" type="text" autoComplete="username" placeholder="nama@contoh.com atau username peserta" value={identifier} onChange={(event) => setIdentifier(event.target.value)} maxLength={254} required />
           </div>
           <div className="login-field">
             <label htmlFor="password">Password</label>
             <input id="password" name="password" type="password" autoComplete="current-password" placeholder="Masukkan password" value={password} onChange={(event) => setPassword(event.target.value)} maxLength={128} required />
           </div>
           <button className="login-submit" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Memproses...' : 'Masuk'}</button>
-          <p className="login-message" role="status" aria-live="polite">{message}</p>
         </form>
         <a className="login-forgot" href="/auth/forget-password">Lupa password?</a>
         <footer className="login-footer">PT. Vaiotech Lintas Nusantara</footer>
       </section>
+      <AuthMessage message={message} onClose={() => setMessage('')} />
     </main>
   );
 }
+
+
 
 

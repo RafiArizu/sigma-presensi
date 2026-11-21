@@ -4,8 +4,8 @@ import { pool } from '../config/database.js';
 export type LocationStatus = 'Non Aktif' | 'Aktif';
 export interface LocationRow extends QueryResultRow { id: string; alamat: string; latitude: string; longitude: string; radius_meters: string; status: LocationStatus; created_by: string; created_at: Date; deleted_at: Date | null; participants: number; }
 const table = 'sigma_presensi.location';
-const columns = `l.id::text AS id, l.alamat, l.latitude::text AS latitude, l.longitude::text AS longitude, l.radius_meters::text AS radius_meters, l.status, l.created_by::text AS created_by, l.created_at, l.deleted_at, COUNT(DISTINCT p.participant_user_id)::int AS participants`;
-const from = `FROM ${table} l LEFT JOIN sigma_presensi.work_sessions ws ON ws.location_version_id = l.id LEFT JOIN sigma_presensi.placements p ON p.id = ws.placement_id`;
+const columns = `l.id::text AS id, l.alamat, l.latitude::text AS latitude, l.longitude::text AS longitude, l.radius_meters::text AS radius_meters, l.status, l.created_by::text AS created_by, l.created_at, l.deleted_at, COUNT(DISTINCT sp.participant_user_id)::int AS participants`;
+const from = `FROM ${table} l LEFT JOIN sigma_presensi.work_sessions ws ON ws.location_id = l.id LEFT JOIN sigma_presensi.shift_participants sp ON sp.shift_id = ws.shift_id AND sp.participant_user_id = ws.participant_user_id`;
 
 export const LocationModel = {
   async findById(id: string): Promise<LocationRow | null> {
@@ -31,3 +31,5 @@ export const LocationModel = {
     return (result.rowCount ?? 0) > 0;
   },
 };
+
+

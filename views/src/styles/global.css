@@ -43,3 +43,15 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; }
 .admin-shell { animation: none !important; transform: none !important; }
 
 
+
+/* SIGMA 404 page */
+.not-found-page { font-family: Poppins, 'Plus Jakarta Sans', sans-serif; min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; background: var(--sigma-background); color: var(--sigma-navy); }
+.not-found-card { width: min(100%, 620px); padding: clamp(32px, 7vw, 72px); border: 1px solid var(--sigma-border-sub); border-radius: 24px; background: #E6E6E6; text-align: center; box-shadow: 0 18px 42px rgba(36, 78, 150, 0.12); }
+.not-found-mark { display: inline-grid; place-items: center; width: 96px; height: 96px; margin-bottom: 28px; border-radius: 24px; background: var(--sigma-navy); color: #fff; font-size: 1.35rem; font-weight: 700; letter-spacing: 0.08em; }
+.not-found-kicker { margin: 0 0 14px; color: var(--sigma-sub-navy); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; }
+.not-found-card h1 { font-family: Poppins, 'Plus Jakarta Sans', sans-serif; margin: 0; color: var(--sigma-navy); font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.15; font-weight: 700; }
+.not-found-copy { max-width: 420px; margin: 16px auto 28px; color: var(--sigma-text-card); font-size: 0.95rem; line-height: 1.7; }
+.not-found-page .not-found-action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; border-radius: 12px; background: var(--sigma-navy); color: #fff !important; font-size: 0.9rem; font-weight: 600; text-decoration: none; }
+.not-found-action:hover { background: var(--sigma-sub-navy); }
+@media (max-width: 520px) { .not-found-card { padding: 32px 22px; border-radius: 20px; } .not-found-mark { width: 80px; height: 80px; margin-bottom: 24px; border-radius: 20px; } }
+

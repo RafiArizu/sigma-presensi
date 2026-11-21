@@ -19,10 +19,11 @@ const currentUser: RequestHandler = async (request, response, next) => {
       return;
     }
 
-    response.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    response.json({ user: { id: user.id, name: user.user_name, user_name: user.user_name, email: user.email, role: user.role } });
   } catch (error) {
     next(error);
   }
 };
 
 export const currentUserController: currentUser = { currentUser };
+

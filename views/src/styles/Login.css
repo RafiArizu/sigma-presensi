@@ -288,6 +288,41 @@
 .login-resend { min-height: 48px; border: 1px solid var(--sigma-navy); border-radius: 8px; background: transparent; color: var(--sigma-navy); font-family: Poppins, 'Plus Jakarta Sans', sans-serif; }
 .login-resend:hover { background: var(--sigma-background); }
 .otp-hint { color: var(--sigma-text-card); font-family: Poppins, 'Plus Jakarta Sans', sans-serif; }
+.auth-message-layer {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: 28px 16px;
+  pointer-events: none;
+}
+.auth-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 440px);
+  padding: 14px 14px 14px 16px;
+  border: 1px solid var(--sigma-border-sub);
+  border-radius: 10px;
+  background: var(--sigma-card-background);
+  box-shadow: 0 14px 32px rgba(25, 48, 89, .18);
+  pointer-events: auto;
+  animation: auth-message-in 180ms ease-out;
+}
+.auth-message p { flex: 1; margin: 0; color: var(--sigma-text-card); font-size: .78rem; font-weight: 600; line-height: 1.45; }
+.auth-message-mark { display: grid; flex: 0 0 28px; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; font-size: .72rem; font-weight: 800; }
+.auth-message-error { border-left: 4px solid #b44747; }
+.auth-message-error .auth-message-mark { background: #b44747; }
+.auth-message-success { border-left: 4px solid #2f8b61; }
+.auth-message-success .auth-message-mark { background: #2f8b61; }
+.auth-message-close { display: grid; flex: 0 0 32px; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 7px; background: transparent; color: var(--sigma-text-card); cursor: pointer; font-size: 1.35rem; line-height: 1; }
+.auth-message-close:hover { background: var(--sigma-background); color: var(--sigma-navy); }
+.auth-message-close:focus-visible { outline: 3px solid rgba(36, 78, 150, .24); outline-offset: 2px; }
+@keyframes auth-message-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .auth-message { animation: none; } }
+
 @media (max-width: 480px) {
   .login-page { padding: 30px 16px; }
   .login-card { padding: 34px 22px 24px; }

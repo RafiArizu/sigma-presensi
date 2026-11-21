@@ -1,6 +1,6 @@
 # PRODUCT REQUIREMENTS DOCUMENT
 ## SIGMA — Sistem Presensi PKL dan Magang Vaiotech
-Versi: 0.3  |  Status: Draft / MVP  |  Platform: Web Application  
+Versi: 0.4  |  Status: Draft / MVP  |  Platform: Web Application  
 Teknologi: React · Vite · TypeScript · Node.js · Express · PostgreSQL · pg
 Target Pengguna: Staff Presensi (Admin), Peserta PKL & Magang (User), Super Admin
 Arsitektur: MVC pada root proyek  |  Perusahaan: PT. Vaiotech Lintas Nusantara
@@ -23,7 +23,7 @@ Daftar Isi
 SIGMA (Sistem Identifikasi dan Pengelolaan Magang serta Absensi) adalah aplikasi web responsif untuk mencatat presensi peserta PKL dan magang di PT. Vaiotech Lintas Nusantara. Peserta mengambil foto, mengaktifkan lokasi, lalu mengirim presensi masuk/pulang. Identitas berasal dari akun yang telah diautentikasi.
 Aplikasi dikembangkan satu orang untuk satu perusahaan. Foto menjadi bukti dokumentasi yang dapat diperiksa Staff Presensi. Sistem tidak mencocokkan wajah atau menyimpulkan identitas dari foto. Server memvalidasi berkas, lokasi, jadwal dan hak akses sebelum mencatat presensi.
 Keputusan proyek: tiga role, stack dan root MVC tetap. Presensi memakai foto dan lokasi; Staff Presensi mengimpor peserta/penempatan serta mengekspor rekap dalam Excel (.xlsx). Jam kerja, radius lokasi, retensi foto, kapasitas dan hosting perlu ditetapkan sebelum pilot.
-Revisi 0.3 tanggal 13 November 2026 mempertahankan 13 bagian dan desain dokumen. Alur presensi diganti menjadi bukti foto dan lokasi; impor/ekspor Excel masuk MVP. Implementasi UI terbaru memusatkan Kelola Data pada tabel attendance photos dan pengaturan durasi retensi pada Settings Super Admin. Dokumen tetap draft untuk validasi kebijakan operasional perusahaan.
+Revisi 0.4 tanggal 20 November 2026 mempertahankan struktur dasar dokumen dan memperjelas Pages Staff Presensi serta implementasi lokasi berbasis peta. Alur presensi diganti menjadi bukti foto dan lokasi; impor/ekspor Excel masuk MVP. Implementasi UI terbaru memusatkan Kelola Data pada tabel attendance photos dan pengaturan durasi retensi pada Settings Super Admin. Dokumen tetap draft untuk validasi kebijakan operasional perusahaan.
 ## 2. Product Goals
 Presensi yang dapat ditelusuri: satu bukti masuk/pulang per sesi kerja, dengan akun peserta, foto privat, waktu server, lokasi dan versi kebijakan yang konsisten.
 Akses cepat yang aman: presensi dari halaman login tetap memverifikasi email/password, kemudian memberi otoritas satu transaksi tanpa membuka dashboard.
@@ -62,6 +62,9 @@ Backend menegakkan role dan kepemilikan objek pada setiap request. Kewenangan ti
 | Database Driver | pg Pool API, connection pool, parameter binding dan transaksi. Tidak memakai ORM. |
 | Authentication & Authorization | Rekomendasi sesi server dengan cookie dan session store PostgreSQL; tiga role tetap. Library sesi dipilih saat implementasi dan tidak menambah role. |
 | Kamera, Lokasi & Excel | getUserMedia dan Geolocation API untuk foto/lokasi. Server memvalidasi gambar dan geofence. Parser/writer .xlsx dipilih berdasarkan kompatibilitas, lisensi dan batas sumber daya. |
+| Peta & Visualisasi Lokasi | Leaflet untuk komponen peta interaktif pada browser, dengan OpenStreetMap tiles sebagai sumber tile peta. |
+| Deteksi Lokasi Browser | Browser Geolocation API digunakan untuk mengambil koordinat perangkat setelah persetujuan pengguna dan memeriksa error/akurasi sampel. |
+| Validasi Radius Backend | Backend menghitung jarak koordinat perangkat ke lokasi terdaftar menggunakan formula Haversine; keputusan berada di server, bukan di browser. |
 | Tooling | npm, Git, lockfile dan migrasi SQL. Satu repository sigma-presensi; Docker, Next.js dan Tailwind tidak digunakan. |
 
 Catatan MVC: root proyek wajib memiliki models/, controllers/, dan views/. React/Vite ditempatkan pada views/; Model dan Controller berjalan di server Express. Struktur ini menggantikan pemisahan folder root frontend/ dan backend/ pada rancangan awal. Dua proses development tetap ada, tetapi berada dalam satu repository.
@@ -184,12 +187,15 @@ URL berikut merupakan rute halaman React, bukan endpoint backend. Tidak ada hala
 ### 7.2 Staff Presensi Pages
 
 | URL / Endpoint | Fungsi & Konten Halaman |
-| /admin/dashboard | Ringkasan kehadiran operasional, pengajuan pending, sesi tidak lengkap dan kasus bantuan. |
-| /admin/peserta | Peserta, aktivasi/nonaktif, penempatan, reset terverifikasi; unduh template dan impor .xlsx dengan pratinjau/error per baris. |
-| /admin/bukti-foto | Pemeriksaan foto presensi terkait peserta/sesi dalam mandat; tidak memberi status identitas cocok secara otomatis. |
-| /admin/jadwal dan /admin/lokasi | Jadwal konkret, tanggal kerja, lokasi kantor dan versi efektif sesuai kebijakan; perubahan diaudit. |
-| /admin/izin dan /admin/koreksi | Antrian keputusan, bukti terbatas, alasan, konflik dan pemeriksaan versi. |
-| /admin/rekap | Rekap per periode/penempatan, penelusuran sumber/koreksi dan ekspor .xlsx sesuai filter; hasil ekspor dicatat. |
+| /staff/dashboard | Ringkasan kehadiran operasional, pengajuan pending dan sesi tidak lengkap. |
+| /staff/peserta | Daftar peserta, aktivasi/nonaktif, periode penempatan dan reset akses peserta terverifikasi. |
+| /staff/institut-pendidikan | Kelola daftar institut pendidikan sekolah dan perguruan tinggi. |
+| /staff/jadwal-prakerin | Atur jadwal masuk sampai pulang prakerin. |
+| /staff/periode-prakerin | Pantau masa periode peserta prakerin. |
+| /staff/izin-kehadiran | Atur dan kelola izin kehadiran peserta prakerin. |
+| /staff/rekap | Rekap kehadiran per periode/penempatan dengan penelusuran sumber dan koreksi. |
+
+Implementasi halaman Staff Presensi menggunakan pola UI konsisten dengan shell dashboard SIGMA, tabel operasional, filter status/periode, state loading/error/empty, dan action yang dibatasi role. Halaman lokasi menggunakan Leaflet dan OpenStreetMap tiles untuk memilih titik/radius; peserta memakai Browser Geolocation API saat presensi; backend melakukan verifikasi jarak Haversine sebelum menerima transaksi.
 
 ### 7.3 Super Admin Pages
 
@@ -515,7 +521,7 @@ Pengelolaan bukti foto: optimasi kompresi, penyimpanan dan retensi berdasarkan p
 Kiosk terawasi: kajian perangkat bersama dan autentikasi peserta terpisah bila dibutuhkan; bukan pengenalan identitas dari foto.
 Aplikasi mobile/offline: hanya bila keterbatasan web terbukti; memerlukan kajian sinkronisasi, replay dan kebijakan waktu yang berbeda.
 Operasi dan kapasitas: tuning query/index dan observabilitas berdasarkan beban nyata. Tidak menambah microservices atau infrastruktur kompleks hanya untuk mengikuti tren.
-Product Requirements Document — SIGMAVersi 0.3 · 13 November 2026 · Status Draft / MVPPT. Vaiotech Lintas NusantaraRoot MVC · React + Vite + TypeScript · Node.js + Express · PostgreSQL · pg
+Product Requirements Document — SIGMAVersi 0.4 · 20 November 2026 · Status Draft / MVPPT. Vaiotech Lintas NusantaraRoot MVC · React + Vite + TypeScript · Node.js + Express · PostgreSQL · pg
 
 
 

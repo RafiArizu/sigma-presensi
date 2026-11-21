@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import '../../styles/Login.css';
+import AuthMessage from '../../components/AuthMessage';
 
 export default function ForgetPasswordPage() {
   const [email, setEmail] = useState('');
@@ -7,6 +8,10 @@ export default function ForgetPasswordPage() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+      setMessage('Masukkan email yang valid.');
+      return;
+    }
     sessionStorage.setItem('sigma.reset.email', email.trim());
     window.location.assign('/auth/reset-password');
   }
@@ -25,11 +30,11 @@ export default function ForgetPasswordPage() {
             <input id="forgot-email" name="email" type="email" autoComplete="email" placeholder="nama@contoh.com" value={email} onChange={(event) => setEmail(event.target.value)} maxLength={254} required />
           </div>
           <button className="login-submit" type="submit">Lanjutkan</button>
-          <p className="login-message" role="status" aria-live="polite">{message}</p>
         </form>
         <a className="login-back" href="/login">Kembali ke login</a>
         <footer className="login-footer">PT. Vaiotech Lintas Nusantara</footer>
       </section>
+      <AuthMessage message={message} onClose={() => setMessage('')} />
     </main>
   );
 }
